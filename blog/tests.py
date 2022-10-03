@@ -24,6 +24,10 @@ class BlogTest(TestCase):
         self.assertEqual(str(post), post.title)
 
 
+    def test_get_absolute_url(self):
+        self.assertEqual(self.post.get_absolute_url(), '/post/1/')
+
+
     def test_post_content(self):
         #post title
         self.assertEqual(f'{self.post.title}', 'test post')
@@ -44,8 +48,8 @@ class BlogTest(TestCase):
 
 
     def test_detail_view(self):
-        response = self.client.get('/post/detail/1/')
-        no_response = self.client.get('post/detail/100000/')
+        response = self.client.get('/post/1/')
+        no_response = self.client.get('post/100000/')
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'post_detail.html')
@@ -54,3 +58,27 @@ class BlogTest(TestCase):
         self.assertContains(response, 'tester')
         
         self.assertEqual(no_response.status_code, 404)
+
+
+    def test_create_post(self):
+        response = self.client.get('/post/new/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'post_new.html')
+
+
+    def test_edit_post(self):
+        response = self.client.post(reverse('post_edit', args='1'),
+            {
+                'title': 'Updated title',
+                'content': 'Updated text.'
+            }
+        )
+
+        self.assertEqual(response.status_code, 302)
+
+    
+    def test_delete_post(self):
+        response = self.client.get('/post/1/delete')
+
+        self.assertEqual(response.status_code, 301)
